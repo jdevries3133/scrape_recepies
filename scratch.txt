@@ -1,0 +1,28 @@
+1. Investite bon apetite website. Find a source of a bunch of pages on the site, or make an algorithm to crawl through the site.
+
+https://www.bonappetit.com/sitemap?year=2020&month=3&week=1
+
+
+
+
+# todo iterate through, and find every url. urls will be a list of every url that we will pass to BAScrape
+urls = [
+    'https://www.bonappetit.com/recipe/roasty-toasty-pecan-caramel-shortbread-cookies',
+    'https://www.bonappetit.com/recipes/article/mastering-the-art-of-sole-meuni-re',
+]
+
+# shit I don't want
+'https://www.bonappetit.com/recipes/article/mastering-the-art-of-sole-meuni-re'
+# shit I do want
+'https://www.bonappetit.com/recipe/classic-sole-meuni-re'
+
+
+
+
+
+
+
+url = 'https://www.bonappetit.com/recipe/roasty-toasty-pecan-caramel-shortbread-cookies'
+
+
+
