@@ -1,5 +1,6 @@
 from copy import copy
 import logging
+import os
 import shelve
 import re
 
@@ -63,6 +64,10 @@ class BonApetitScrape:
 
 
 def get_bon_apetit_urls(starter_url):
+    """
+    Recursively crawl through the bon apetit website, and get all urls for recepie pages.
+
+    """
 
     def recursive(blacklist, to_do, recepie_list=None):
 
@@ -143,39 +148,50 @@ def get_bon_apetit_urls(starter_url):
 
     return recipe_pages
 
+def cache_pages_at_urls(urls):
+    """
+    Cache the html pages that come from each url.
+    """
+
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+
+    for url in urls:
+            ba_scr = BonApetitScrape(url)
+            file_path = os.path.join(
+                base_dir,
+                'sample_pages',
+                '2020',
+                f'{url[34:]}.html',
+            )
+            break
+            with open(file_path, 'w') as html:
+                html.write(ba_scr.response.text)
+
+    return 0
+
+def cache_urls(urls):
+    """
+    Cache the urls themselves, both in a txt file, and in a shelve
+    database
+    """
+    db = shelve.open('url_database')
+    db['url_list'] = urls
+    db.close()
+
+    with open('url_list.txt', 'w') as file:
+        for url in urls:
+            file.write(f'{url}\n\n')
+
+    return 0
+
+
+
 if __name__ == '__main__':
 
 
-    # going away soon
-    import os
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-
-    urls = [
-        'https://www.bonappetit.com/recipe/vegetarian-ramen',
-        'https://www.bonappetit.com/recipe/grilled-sardines-with-aioli',  # slideshow conversion done manually
-        'https://www.bonappetit.com/recipe/roasty-toasty-pecan-caramel-shortbread-cookies',
-    ]
-
     # call new url iterator function
     urls = get_bon_apetit_urls('https://www.bonappetit.com/sitemap')
-    with open('urls.txt', 'w') as file:
-        for url in urls:
-            file.write(url)
 
-    with shelve.open('url_database') as db:
-        db['urls'] = urls
-
-
-    # for url in urls:
-    #     ba_scr = BonApetitScrape(url)
-    #     file_path = os.path.join(
-    #         base_dir,
-    #         'sample_pages',
-    #         '2020',
-    #         f'{url[34:]}.html',
-    #     )
-    #     break
-    #     with open(file_path, 'w') as html:
-    #         html.write(ba_scr.response.text)
-
+    cache_urls(urls)
+    cache_pages_at_urls(urls)
 

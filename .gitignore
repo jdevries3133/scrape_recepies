@@ -1,4 +1,6 @@
 __pycache__
+urls.txt
+*.db
 forrest
 main.log
 venv
