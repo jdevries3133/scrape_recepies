@@ -1,4 +1,6 @@
 from copy import copy
+import logging
+import shelve
 import re
 
 from bs4 import BeautifulSoup
@@ -6,7 +8,7 @@ import requests
 
 from parsers import Parsers
 
-
+logging.basicConfig(filename='main.log', level='DEBUG', filemode='w')
 
 
 class BonApetitScrape:
@@ -64,12 +66,20 @@ def get_bon_apetit_urls(starter_url):
 
     def recursive(blacklist, to_do, recepie_list=None):
 
-        if not recepie_list:
-            recepie_list = []
+        logging.debug(('=' * 80))
 
         to_do_next = []
         for url in to_do:
-
+            log_msg = (
+                '\n\n\n'
+                + url
+                + '\n\n\n'
+                + str(len(to_do))
+                + '\n\n\n'
+                + str(recepie_list)
+                + '\n\n\n'
+            )
+            logging.debug(log_msg)
             # make request and makes the soup, searches the soup
             resp = requests.get(url)
             soup = BeautifulSoup(resp.text)
@@ -81,9 +91,9 @@ def get_bon_apetit_urls(starter_url):
 
             # creates to_do_next
             for i in hrefs:
-                print(i.contents)
-                concatenated_url = 'https://www.bonappetit.com' + i.contents[0]
+                concatenated_url = 'https://www.bonappetit.com/' + i.contents[0]
                 to_do_next.append(copy(concatenated_url))
+
 
             # grows the master list by append to_do_next
             recipe_regex = re.compile(r'https://www.bonappetit.com/recipe/(.*)')
@@ -94,51 +104,44 @@ def get_bon_apetit_urls(starter_url):
                 if item in blacklist:
                     continue
 
-                item = 'https://www.bonappetit.com/recipes/slideshow/anchovy-sardine-recipes'
-
                 # process recepie
                 mo_recepie = re.search(recipe_regex, item)
+                logging.debug(item)
                 if mo_recepie:
                     recepie_extension = mo_recepie[1]
                     recepie_list.append(recepie_extension)
-                    breakpoint()
+                    logging.debug(f'recepie:   {recepie_extension}')
                     blacklist.append(item)
                     continue
 
                 # process slideshow
                 mo_slideshow = re.search(slideshow_regex, item)
-                breakpoint()
                 if mo_slideshow:
-                    response = requests.get(item)
-                    soup = BeautifulSoup(response.text)
-                    hrefs = soup.find_all(
-                        'a',
-                        href=True,
-                    )
-
-                    # append hrefs that match the recepie regex
-                    for i in hrefs:
-                        if not re.search(recipe_regex, i.content):
-                            recepie_list.append(i)
+                    resp = requests.get(item)
+                    soup = BeautifulSoup(resp.text)
+                    for a in soup.find_all('a', href=True):
+                        mo = re.search(recipe_regex, a['href'])
+                        if mo:
+                            recepie_list.append(mo[1])
+                            logging.debug(('*' * 80))
+                        else:
+                            logging.debug(
+                                f'href in slideshow page {item} is '
+                                f'not a recepie: {a}'
+                                )
 
                 blacklist.append(item)
 
+                # whenever we get to 10k recepies, that's good enough!
+                if recepie_list > 10000:
+                    return recepie_list
 
-            # exit statement, leave recursion
-            if not to_do_next:
-                print('empty list')
-                breakpoint()
-
-        breakpoint()
 
         return recursive(blacklist, to_do_next, recepie_list)
 
-    recipe_pages = recursive([starter_url], [starter_url])
+    recipe_pages = recursive([starter_url], [starter_url], [])
 
-
-
-    return hrefs, get_bon_apetit_urls(hrefs)
-
+    return recipe_pages
 
 if __name__ == '__main__':
 
@@ -155,23 +158,24 @@ if __name__ == '__main__':
 
     # call new url iterator function
     urls = get_bon_apetit_urls('https://www.bonappetit.com/sitemap')
+    with open('urls.txt', 'w') as file:
+        for url in urls:
+            file.write(url)
+
+    with shelve.open('url_database') as db:
+        db['urls'] = urls
 
 
-
-    import sys
-    sys.exit()
-
-
-    for url in urls:
-        ba_scr = BonApetitScrape(url)
-        file_path = os.path.join(
-            base_dir,
-            'sample_pages',
-            '2020',
-            f'{url[34:]}.html',
-        )
-        break
-        # with open(file_path, 'w') as html:
-        #     html.write(ba_scr.response.text)
+    # for url in urls:
+    #     ba_scr = BonApetitScrape(url)
+    #     file_path = os.path.join(
+    #         base_dir,
+    #         'sample_pages',
+    #         '2020',
+    #         f'{url[34:]}.html',
+    #     )
+    #     break
+    #     with open(file_path, 'w') as html:
+    #         html.write(ba_scr.response.text)
 
 
