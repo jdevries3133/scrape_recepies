@@ -133,7 +133,7 @@ def get_bon_apetit_urls(starter_url):
                 blacklist.append(item)
 
                 # whenever we get to 10k recepies, that's good enough!
-                if recepie_list > 10000:
+                if len(recepie_list) > 10000:
                     return recepie_list
 
 
