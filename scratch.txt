@@ -1,6 +1,92 @@
+1. write the thing that navigates through the sitemap.
+2. write all those html files to our hard drives for analysis
+3. start to pick apart them, and write parsers and routers
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 1. Investite bon apetite website. Find a source of a bunch of pages on the site, or make an algorithm to crawl through the site.
 
 https://www.bonappetit.com/sitemap?year=2020&month=3&week=1
+
+
+
+
+
+
+
+
+
+
+
+2020 samples:
+
+
+https://www.bonappetit.com/recipe/vegetarian-ramen
+    <div class="ingredients_text">INGREDIENTS</div>
+
+https://www.bonappetit.com/recipe/roasty-toasty-pecan-caramel-shortbread-cookies
+
+    container for everything:
+    /html/body/div[4]/div/div[2]/div[3]/div/div/div[1]/div[1]/div[3]/div/ol
+        ol tag
+        class='steps'
+        data-reactid=430
+
+    ingredient element within each container:
+    /html/body/div[4]/div/div[2]/div[3]/div/div/div[1]/div[1]/div[3]/div/ol/li[1]/div/p/strong
+
+https://www.bonappetit.com/recipes/slideshow/anchovy-sardine-recipes --> https://www.bonappetit.com/recipe/grilled-sardines-with-aioli
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
