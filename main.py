@@ -1,20 +1,25 @@
 from copy import copy
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from io import BytesIO
 import logging
 import os
 import shelve
+import time
 import re
 import sys
 
-import pycurl
 import certifi
-from io import BytesIO
-from bs4 import BeautifulSoup
-import requests
-from line_profiler import LineProfiler
+import pycurl
+from bs4 import BeautifulSoup, SoupStrainer
 
 from parsers import Parsers
 
-logging.basicConfig(filename='main.log', level='DEBUG', filemode='w')
+logging.basicConfig(
+    filename='l_main.log',
+    level='DEBUG',
+    filemode='w',
+    format='%(asctime)s %(levelname)-8s %(message)s'
+)
 
 
 class BonApetitScrape:
@@ -66,7 +71,7 @@ class BonApetitScrape:
         """
         response = BonApetitCrawler.make_pycurl_request(self.url)
         self.response = response
-        soup = BeautifulSoup(response, features='html.parser')
+        soup = BeautifulSoup(response, features='lxml')
         return soup
 
 
@@ -82,7 +87,7 @@ class BonApetitCrawler:
         # define location of the cache
         self.cache_dir = (
             os.path.join(
-                os.path.abspath(__file__),
+                os.path.dirname(os.path.abspath(__file__)),
                 'cache'
             )
         )
@@ -90,31 +95,24 @@ class BonApetitCrawler:
             self.cache_dir,
             'bon_apetit_cache'
         )
-
         # read the cache, if requested
         if read_cache:
             self.recipe_list = self.read_cache_func()
 
         else:
+            self.url_dict = {}
             self.recipe_list = self.get_bon_apetit_urls()
-            self.urls = [
-                self.base_url + item
-                for item, day_mo_wk
-                in self.recipe_list
-            ]
-            if write_cache:
-                self.write_cache_func()
+            self.write_cache_func()
 
         if debug_mode:
             self.html_dir = os.path.join(self.cache_dir, 'html_pages')
-            self.make_html_pages()
 
-    def write_cache_fun(self):
-        with shelve.open(self.cache_path, 'w') as db:
+    def write_cache_func(self):
+        with shelve.open(self.cache_path) as db:
             db['cache'] = self.recipe_list
 
     def read_cache_func(self):
-        with shelve.open(self.cache_path, 'r') as db:
+        with shelve.open(self.cache_path) as db:
             self.recipe_list = db['cache']
 
     def cache_recipe_page_responses(self):
@@ -127,131 +125,132 @@ class BonApetitCrawler:
         """
         pass
 
-
     def get_bon_apetit_urls(self):
         """
         Recursively crawl through the bon apetit website, and get all
         urls for recipe pages.
         """
-        recipe_pages = BonApetitCrawler.recursive(
-            [self.sitemap],
-            [self.sitemap],
-            [],
-        )
+        recipe_pages = self.recursive([self.sitemap], [])
         return recipe_pages
 
-    @staticmethod
-    def recursive(blacklist, to_do, recipe_list):
+    def recursive(self, links_to_do, links_found):
+        log_msg = (
+            '\n\n\n'
+            + str(links_to_do)
+            + '\n\n\n'
+            + str(links_found)
+            + '\n\n\n'
+            + str(self.url_dict)
+            + '\n\n\n'
+        )
+        logging.debug('=' * 80)
+        logging.debug(log_msg)
 
-        logging.debug(('=' * 80))
+        next_level = []
+        resp_tuples = self.multithread_requests(links_to_do)
+        for index, resp_tuple in enumerate(resp_tuples):
+            resp, url = resp_tuple
+            logging.debug(f'Processed {index} of {len(resp_tuples)} responses.')
 
-        to_do_next = []
-        for index, url in enumerate(to_do):
-            log_msg = (
-                '\n\n\n'
-                + url
-                + '\n\n\n'
-                + f'{index}/{len(to_do)} processed.'
-                + '\n'
-                + str(len(recipe_list))
-                + '\n\n\n'
-                + str(recipe_list)
-                + '\n\n\n'
-            )
-            logging.debug(log_msg)
-
-            # make request and makes the soup, searches the soup
-            resp = BonApetitCrawler.make_pycurl_request(url)
-            soup = BeautifulSoup(resp, features='html.parser')
+            # make the soup, searches the soup
+            strainer = SoupStrainer('a', class_='sitemap__link', href=True)
+            soup = BeautifulSoup(resp, features='html.parser', parse_only=strainer)
             hrefs = soup.find_all(
                 name='a',
                 href=True,
                 class_='sitemap__link',
             )
 
-
-            # creates to_do_next
             try:
-                for i in hrefs:
-                    concatenated_url = (
-                        'https://www.bonappetit.com'
-                        + i.contents[0]
+                hrefs[0].contents[0][0]
+            except IndexError:
+                continue
+
+            if hrefs[0].contents[0][0] == '/':
+                links_found = [
+                    'https://www.bonappetit.com'
+                    + i.contents[0]
+                    for i
+                    in hrefs
+                ]
+                next_level += links_found
+
+        if next_level:
+            logging.debug(f'Called self.recursive.')
+            return self.recursive(next_level, [])
+
+        if not next_level:
+            return self.sort_base_urls(
+                [
+                    'https://www.bonappetit.com/'
+                    + i.contents[0]
+                    for i
+                    in hrefs
+                ],
+                url,
                     )
-                    to_do_next.append(copy(concatenated_url))
-            except AttributeError:
-                logging.debug((i + '!!!!!!!!!!!!!!'))
-                return recipe_list
 
-            slideshow_regex = re.compile(
-                r'https://www.bonappetit.com/recipes/slideshow/(.*)'
-            )
+    def sort_base_urls(self, urls, parent_url):
 
-            for item in to_do_next:
+        recipe_urls = [i for i in urls if i[27:36] == 'recipe/']
+        recipe_page_urls = [i for i in urls if i[27:36] == 'recipes']
+        for rp_url in recipe_page_urls:
+            recipe_urls += self.scrape_recipes_from_page(rp_url)
 
-                if item in blacklist:
-                    continue
+        for url in recipe_urls:
+            date_string = parse_parent(parent_url)
+            name = url[37:].replace('-', ' ').title()
+            self.url_dict[date_string] = {
+                'name': name,
+                'url': url,
+                'neighbors': recipe_urls,
+                'parent_url': parent_url
+            }
+        return
 
-                # process recipe
-                if item[27:36] == 'recipe/':
+    def scrape_recipes_from_page(self, url):
+        resp = BonApetitCrawler.make_pycurl_request(url)
+        strainer = SoupStrainer('a', href=True)
+        soup = BeautifulSoup(
+            resp,
+            features='lxml',
+            parse_only=strainer,
+        )
+        hrefs = soup.find_all('a', href=True)
+        return ['https://www.bonappetit.com/' + i.contents[0] for i in hrefs]
 
-                    # get year, month, and date from sitemap url
-                    pattern = (r'(\d\d\d\d)&month=(\d+)&week=(\d)')
-                    url_param_regex = re.compile(pattern)
-                    mo = re.search(url_param_regex, url[40:])
-                    year, month, week = mo[1], mo[2], mo[3]
-                    date_string = f'{year}_{month}_week_{week}'
+    def parse_parent(self, parent_url):
+        # get year, month, and date from sitemap url
+        pattern = (r'(\d\d\d\d)&month=(\d+)&week=(\d)')
+        url_param_regex = re.compile(pattern)
+        mo = re.search(url_param_regex, parent_url[40:])
+        year, month, week = mo[1], mo[2], mo[3]
+        date_string = f'{year}_{month}_week_{week}'
 
-                    # append
-                    recipe_extension = item[37:]
-                    recipe_list.append((recipe_extension, date_string))
-                    logging.debug(f'recipe:   {recipe_extension}')
-                    blacklist.append(item)
-                    continue
+        return date_string
 
-                # process slideshow
-                mo_slideshow = re.search(slideshow_regex, item)
-                if item[27:36] == 'recipes':
-                    resp = BonApetitCrawler.make_pycurl_request(item)
-                    soup = BeautifulSoup(resp, features='html.parser')
-                    for a in soup.find_all('a', href=True):
-                        if a['href'][27:36] == 'recipe/':
+    def multithread_requests(self, urls):
+        response_and_url = []
+        with ThreadPoolExecutor(max_workers=200) as executor:
+            threads = [
+                executor.submit(
+                    BonApetitCrawler.make_pycurl_request, url
+                )
+                for url
+                in urls
+            ]
 
-                            # get year, month, and date from sitemap url
-                            pattern = (
-                                r'(\d\d\d\d)&month=(\d+)&week=(\d)'
-                            )
-                            url_param_regex = re.compile(pattern)
-                            mo = re.search(url_param_regex, url[40:])
-                            year, month, week = mo[1], mo[2], mo[3]
-                            date_string = f'{year}_{month}_week_{week}'
+            for r in as_completed(threads):
+                try:
+                    response_and_url.append(r.result())
 
-                            # append
-                            recipe_list.append((item[37:], date_string))
-                            logging.debug(('*' * 80))
+                except Exception as e:
+                    logging.warning(
+                        f'{r} generated an exception: {e}.'
+                    )
+                    logging.warning(dir(r))
 
-                        else:
-                            logging.debug(
-                                f'href in slideshow page {item} is '
-                                f'not a recipe: {a}'
-                                )
-
-                blacklist.append(item)
-
-                # exit recursion if there is nothing left to do next.
-                if to_do_next == []:
-                    return recipe_list
-
-        try:
-            BonApetitCrawler.recursive(
-                blacklist,
-                to_do_next,
-                recipe_list
-            )
-        except RecursionError:
-            return recipe_list
-            logging.debug(
-                '***** *** exit case failed. Fell back to recursion error handling'
-            )
+        return response_and_url
 
     @staticmethod
     def make_pycurl_request(url):
@@ -264,7 +263,12 @@ class BonApetitCrawler:
 
         crl.close()
 
-        return buffer.getvalue().decode()
+        logging.debug(f'response recieved from {url}')
+
+        return buffer.getvalue().decode(), url
+
+
+
 
 
 
