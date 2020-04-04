@@ -3,4 +3,5 @@ urls.txt
 *.db
 forrest
 main.log
+url_list.txt
 venv

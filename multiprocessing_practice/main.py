@@ -237,21 +237,16 @@ class BonApetitCrawler:
 
                 blacklist.append(item)
 
-                # exit recursion if there is nothing left to do next.
+                # whenever we get to 10k recipes, that's good enough!
                 if to_do_next == []:
                     return recipe_list
 
-        try:
-            BonApetitCrawler.recursive(
-                blacklist,
-                to_do_next,
-                recipe_list
-            )
-        except RecursionError:
-            return recipe_list
-            logging.debug(
-                '***** *** exit case failed. Fell back to recursion error handling'
-            )
+
+        return BonApetitCrawler.recursive(
+            blacklist,
+            to_do_next,
+            recipe_list
+        )
 
     @staticmethod
     def make_pycurl_request(url):
