@@ -6,8 +6,13 @@ ba_context = {
     'url cache key': 'all_urls',
     'read cache': False,
     'debug mode': True,
-    'read debug cache': True,
+    'read debug cache': False,
 }
 
 crawler = BonApetitCrawler(ba_context)
-crawler.get_urls()
+urls = crawler.get_urls()
+crawler.cache_urls()
+print(urls)
+import shelve
+with shelve.open(crawler.cache_path) as db:
+    test = db['all_urls']

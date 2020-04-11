@@ -68,15 +68,32 @@ class Crawler(ABC):
         """
         pass
 
-    def cache_urls(self, lol_parent_children, write_cache=True):
+    def cache_urls(self):
+        # reference 'read debug cache' attribute
+        write_cache = not self.context['read debug cache']
+
+        # read cache
         if not write_cache:
             with shelve.open(self.cache_path) as db:
-                lol_parent_children = db[self.context['url cache key']]
+                self.all_urls = db[self.context['url cache key']]
+
+        # write cache
         if write_cache:
+
+            # check for self.all_urls attribute
+            if not hasattr(self, 'all_urls'):
+                raise Exception(
+                    'Cannot cache urls, because self.get_urls() has '
+                    'not yet been called, and self.all_urls is not defined.'
+                )
+
+            # write
             with shelve.open(self.cache_path) as db:
-                db[self.context['url cache key']] = lol_parent_children
-        logging.debug(f'lpc: {lol_parent_children}')
-        return lol_parent_children
+                db[self.context['url cache key']] = self.all_urls
+
+        logging.debug(f'lpc: {self.all_urls}')
+
+        return self.all_urls
 
     def multithread_requests(self, urls):
         response_and_url = []

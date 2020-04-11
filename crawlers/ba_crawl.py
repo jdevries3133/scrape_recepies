@@ -24,18 +24,20 @@ class BonApetitCrawler(Crawler):
     def get_urls(self):
         """
         Recursively crawl through the bon apetit website, and get all
-        urls for recipe pages.
+        urls.
 
-        Returns (parent_url, recipe_url)
+        *** this now returns ALL urls, unsorted.***
         """
 
         if self.context['read debug cache']:  # this defniitely works now
             return self.cache_urls(None, write_cache=False)
 
-        recipe_pages = self.recursive([self.sitemap])
-        if recipe_pages == []:
+        all_urls = self.recursive([self.sitemap])
+        if all_urls == []:
             logging.error('recipe pages is empty.')
-        return recipe_pages
+
+        self.all_urls = all_urls
+        return all_urls
 
     def recursive(self, links_to_do):
         """
@@ -112,7 +114,7 @@ class BonApetitCrawler(Crawler):
                 'entered if not. Parents and Children:'
                 f'\n{lol_parent_children}'
             )
-            return self.sort_base_urls(lol_parent_children)
+            return lol_parent_children
 
     def make_url_dict(self):
         """
@@ -131,21 +133,33 @@ class BonApetitCrawler(Crawler):
                 }
             }
         }
+
+        note: this function must be called from outside, and we are not calling
+        it, so the fact that it is unfinished does not affect our ability to get
+        urls.
         """
+        # write to the cache, only if we are not already reading from it.
         write_cache = not self.context['read debug cache']
         self.cache_urls(lol_parent_children, write_cache=write_cache)
 
-        ol = []
-        shitlist = []
-        for parent_url, child_urls in lol_parent_children:
-            for url in child_urls:
-                if '/recipe/' in url:
-                    ol.append((parent_url, url))
-                else:
-                    shitlist.append((parent_url, url))
+        if not hasattr(self, 'all_urls'):
+            raise Exception(
+                'Cannot sort urls, because self.get_urls has not '
+                'been called, and self.all_urls attribute is not yet defined.'
+            )
 
-        if shitlist_mode:
-            return shitlist
+        'need to rewrite to output new data structure.'
+        # ol = []
+        # shitlist = []
+        # for parent_url, child_urls in lol_parent_children:
+        #     for url in child_urls:
+        #         if '/recipe/' in url:
+        #             ol.append((parent_url, url))
+        #         else:
+        #             shitlist.append((parent_url, url))
+
+        # if shitlist_mode:
+        #     return shitlist
 
         return ol
 
