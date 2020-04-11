@@ -5,7 +5,15 @@ import os
 import shelve
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+import certifi
 import pycurl
+
+logging.basicConfig(
+    filename='l:abc_crawlers.log',
+    level='DEBUG',
+    filemode='w',
+    format='%(asctime)s %(levelname)-8s %(message)s'
+)
 
 class Crawler(ABC):
     def __init__(self, sitemap_url, context):
@@ -60,11 +68,11 @@ class Crawler(ABC):
         """
         pass
 
-    def cache_urls(self, lol_parent_children, use_cache: bool):
-        if not use_cache:
+    def cache_urls(self, lol_parent_children, write_cache=True):
+        if not write_cache:
             with shelve.open(self.cache_path) as db:
                 db[self.context['url cache key']] = lol_parent_children
-        if use_cache:
+        if write_cache:
             with shelve.open(self.cache_path) as db:
                 lol_parent_children = db[self.context['url cache key']]
         return lol_parent_children
@@ -74,7 +82,7 @@ class Crawler(ABC):
         with ThreadPoolExecutor(max_workers=200) as executor:
             threads = [
                 executor.submit(
-                    BonApetitCrawler.make_pycurl_request, url
+                    self.make_pycurl_request, url
                 )
                 for url
                 in urls
@@ -89,8 +97,7 @@ class Crawler(ABC):
 
         return response_and_url
 
-    @staticmethod
-    def make_pycurl_request(url):
+    def make_pycurl_request(self, url):
         try:
             buffer = BytesIO()
             crl = pycurl.Curl()

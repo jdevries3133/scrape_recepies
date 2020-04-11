@@ -3,7 +3,7 @@ from ba_crawl import BonApetitCrawler
 ba_context = {
     'site name': 'Bon Apetit',
     'cache key': 'BA Cache',
-    'url cache key': 'all urls',
+    'url cache key': 'all_urls',
     'read cache': False,
     'debug mode': True,
     'read debug cache': False,
@@ -11,4 +11,5 @@ ba_context = {
 
 crawler = BonApetitCrawler(ba_context)
 crawler.get_urls()
-# crawler.write_cache_func()
+print(crawler.url_dict)
+crawler.write_cache_func()

@@ -1,4 +1,14 @@
 from abc_crawlers import Crawler
+import logging
+
+from bs4 import BeautifulSoup, SoupStrainer
+
+logging.basicConfig(
+    filename='l:ba_crawl.log',
+    level='DEBUG',
+    filemode='w',
+    format='%(asctime)s %(levelname)-8s %(message)s'
+)
 
 class BonApetitCrawler(Crawler):
     """
@@ -10,37 +20,24 @@ class BonApetitCrawler(Crawler):
             'https://www.bonappetit.com/sitemap',
             context
         )
-        # self.base_url = 'https://www.bonappetit.com/'
-        # self.sitemap = self.base_url + 'sitemap'
-
-        # define location of the cache
-
-
-        # read the cache, if requested
 
     def get_urls(self):
         """
         Recursively crawl through the bon apetit website, and get all
         urls for recipe pages.
+
+        Returns (parent_url, recipe_url)
         """
 
         if self.context['read debug cache']:
             recipe_pages = self.cache_urls(None, use_cache=True)
 
-        recipe_pages = self.recursive([self.sitemap], cache=True)
+        recipe_pages = self.recursive([self.sitemap])
         if recipe_pages == []:
             logging.error('recipe pages is empty.')
         return recipe_pages
 
-    # def write_cache_func(self):
-    #     with shelve.open(self.cache_path) as db:
-    #         db['cache'] = self.url_dict
-
-    # def read_cache_func(self):
-    #     with shelve.open(self.cache_path) as db:
-    #         self.url_dict = db['cache']
-
-    def recursive(self, links_to_do, cache=False):
+    def recursive(self, links_to_do):
         """
         tuples_found is a list of tuples that we ultimately want.
         These tuples containe two items: the https response from a url,
@@ -50,9 +47,6 @@ class BonApetitCrawler(Crawler):
         This list of tuples is only appended to if it is a leaf node of
         the sitemap tree.
         """
-        if cache:
-            lol_parent_children = self.cache_urls(None, use_cache=True)
-            return self.sort_base_urls(lol_parent_children)
 
         log_msg = (str(links_to_do))
         logging.debug('=' * 80)
@@ -116,7 +110,7 @@ class BonApetitCrawler(Crawler):
             )
             return self.sort_base_urls(lol_parent_children)
 
-    def sort_base_urls(self, lol_parent_children, shitlist_mode=False, use_cache=False):
+    def sort_base_urls(self, lol_parent_children, shitlist_mode=False):
         """
         What we're getting:
 
@@ -129,7 +123,8 @@ class BonApetitCrawler(Crawler):
 
         We really need any string that contains '/recipe/'
         """
-        self.cache_urls(lol_parent_children, use_cache)
+        write_cache = not self.context['read debug cache']
+        self.cache_urls(lol_parent_children, write_cache=write_cache)
 
         ol = []
         shitlist = []
@@ -144,15 +139,6 @@ class BonApetitCrawler(Crawler):
             return shitlist
 
         return ol
-
-    # def cache_urls(self, lol_parent_children, use_cache: bool):
-    #     if not use_cache:
-    #         with shelve.open(self.cache_path) as db:
-    #             db['all_urls'] = lol_parent_children
-    #     if use_cache:
-    #         with shelve.open(self.cache_path) as db:
-    #             lol_parent_children = db['all_urls']
-    #     return lol_parent_children
 
     def scrape_recipes_from_page(self, url):
         """
@@ -173,42 +159,3 @@ class BonApetitCrawler(Crawler):
 
     def cache_recipe_page_responses(self):
         pass
-
-    # def multithread_requests(self, urls):
-    #     response_and_url = []
-    #     with ThreadPoolExecutor(max_workers=200) as executor:
-    #         threads = [
-    #             executor.submit(
-    #                 BonApetitCrawler.make_pycurl_request, url
-    #             )
-    #             for url
-    #             in urls
-    #         ]
-
-    #         for r in as_completed(threads):
-    #             try:
-    #                 response_and_url.append(r.result())
-
-    #             except Exception as e:
-    #                 logging.warning(e)
-
-    #     return response_and_url
-
-    # @staticmethod
-    # def make_pycurl_request(url):
-    #     try:
-    #         buffer = BytesIO()
-    #         crl = pycurl.Curl()
-    #         crl.setopt(crl.URL, url)
-    #         crl.setopt(crl.WRITEDATA, buffer)
-    #         crl.setopt(crl.CAINFO, certifi.where())
-    #         crl.perform()
-
-    #         crl.close()
-
-    #         logging.debug(f'response recieved from {url}')
-
-    #     except Exception as e:
-    #         raise Exception(f'{url} failed because of {e}.')
-
-    #     return buffer.getvalue().decode(), url
