@@ -145,7 +145,7 @@ class Crawler(ABC):
         pass
 
     @abstractmethod
-    def sort_base_urls(self):
+    def make_url_dict(self):
         """
         Go through the recursively discovered list of urls, and filter them
         down to what we actually want; urls which are pages of recipes.
