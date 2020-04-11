@@ -114,18 +114,23 @@ class BonApetitCrawler(Crawler):
             )
             return self.sort_base_urls(lol_parent_children)
 
-    def sort_base_urls(self, lol_parent_children, shitlist_mode=False):
+    def make_url_dict(self):
         """
-        What we're getting:
+        Sort the urls into a dict that can interact with the abstract base class
+        again.
 
-        list of these guys:
-            (parent_url, children_urls)
-
-        What we need to do:
-
-            Sort recepie urls only from the parent url
-
-        We really need any string that contains '/recipe/'
+        dict = {
+            'url groups': {
+                'recipe pages': {
+                    'parent url': [child urls],
+                    'parent url2': [child urls2],
+                }
+                'other urls': {
+                    'parent url': [other urls],
+                    (etc)
+                }
+            }
+        }
         """
         write_cache = not self.context['read debug cache']
         self.cache_urls(lol_parent_children, write_cache=write_cache)
