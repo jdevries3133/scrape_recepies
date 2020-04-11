@@ -48,11 +48,11 @@ class Crawler(ABC):
             self.html_dir = os.path.join(self.cache_dir, 'html_pages')
 
     def write_cache_func(self):
-        with shelve.open(self.cache_path) as db:
+        with shelve.open(self.cache_path, protocol=5) as db:
             db[self.context['cache key']] = self.url_dict
 
     def read_cache_func(self):
-        with shelve.open(self.cache_path) as db:
+        with shelve.open(self.cache_path, protocol=5) as db:
             cached_url_dict = db[self.context['cache key']]
         return cached_url_dict
 
@@ -79,6 +79,7 @@ class Crawler(ABC):
             }
         }
         """
+        logging.debug('Pulling recipe pages.')
         # dict data => [(url, (context))] --- that'll be var "input_list"
         tuples_for_func = []
         # context = {'supercat': 'super', 'subcat': 'sub'}
@@ -90,11 +91,41 @@ class Crawler(ABC):
                     tuples_for_func.append(
                         (child, context)
                     )
+        logging.debug('Making requests to recipe pages')
 
-        # results are going to be (response, url, context)
-        results = self.multithread_requests(tuples_for_func[:100])
+        for i in range(0, len(tuples_for_func), 500):
+            # run operation on a subset at a time, to avoid memory binding.
+            subset = tuples_for_func[i:(i + 500)]
+            logging.debug(f'Saving the following pages:\n{subset}')
 
-        # all works up to this point
+            # results are going to be (response, url, context)
+            results = self.multithread_requests(subset)
+            logging.debug(f'Got results: {len(results)}')
+            mthr_saves = []
+            for result in results:
+                # (html, url, context)]
+                folder = os.path.join(self.html_dir, result[2]['supercat'])
+                if not os.path.exists(folder):
+                    os.mkdir(folder)
+
+                # make filename
+                fn1 = self.parse_parent(result[2]['subcat'])
+                fn2 = self.file_name_from_url(result[1])
+                filename = f'{fn1} {fn2}.html'
+                path = os.path.join(folder, filename)
+
+                mthr_saves.append((path, result[0]))
+
+
+            with ThreadPoolExecutor(max_workers=200) as executor:
+                threads = executor.map(self.multithreaded_html_save, mthr_saves)
+
+    def multithreaded_html_save(self, tupl):
+        path, html = tupl
+        with open(path, 'w') as file:
+            file.write(html)
+        logging.debug(f'Saved {file} to the hard drive.')
+
 
     def cache_urls(self):
         # reference 'read debug cache' attribute
@@ -102,7 +133,7 @@ class Crawler(ABC):
 
         # read cache
         if not write_cache:
-            with shelve.open(self.cache_path) as db:
+            with shelve.open(self.cache_path, protocol=5) as db:
                 self.all_urls = db[self.context['url cache key']]
 
         # write cache
@@ -116,7 +147,7 @@ class Crawler(ABC):
                 )
 
             # write
-            with shelve.open(self.cache_path) as db:
+            with shelve.open(self.cache_path, protocol=5) as db:
                 db[self.context['url cache key']] = self.all_urls
 
         logging.debug(f'lpc: {self.all_urls}')
@@ -211,4 +242,8 @@ class Crawler(ABC):
         Go through the recursively discovered list of urls, and filter them
         down to what we actually want; urls which are pages of recipes.
         """
+        pass
+
+    @abstractmethod
+    def file_name_from_url(self):
         pass

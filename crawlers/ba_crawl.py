@@ -1,5 +1,6 @@
 from abc_crawlers import Crawler
 import logging
+import re
 
 from bs4 import BeautifulSoup, SoupStrainer
 
@@ -182,3 +183,6 @@ class BonApetitCrawler(Crawler):
         date_string = f'{year}_{month}_week_{week}'
 
         return date_string
+
+    def file_name_from_url(self, url):
+        return url[34:].replace('-', ' ').title()
