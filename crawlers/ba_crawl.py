@@ -4,7 +4,7 @@ import logging
 from bs4 import BeautifulSoup, SoupStrainer
 
 logging.basicConfig(
-    filename='l:ba_crawl.log',
+    filename='ba_crawl.log',
     level='DEBUG',
     filemode='w',
     format='%(asctime)s %(levelname)-8s %(message)s'
@@ -29,8 +29,8 @@ class BonApetitCrawler(Crawler):
         Returns (parent_url, recipe_url)
         """
 
-        if self.context['read debug cache']:
-            recipe_pages = self.cache_urls(None, use_cache=True)
+        if self.context['read debug cache']:  # this defniitely works now
+            return self.cache_urls(None, write_cache=False)
 
         recipe_pages = self.recursive([self.sitemap])
         if recipe_pages == []:
@@ -61,7 +61,11 @@ class BonApetitCrawler(Crawler):
 
             # make the soup, searches the soup
             strainer = SoupStrainer('a', class_='sitemap__link', href=True)
-            soup = BeautifulSoup(resp, features='html.parser', parse_only=strainer)
+            soup = BeautifulSoup(
+                resp,
+                features='html.parser',
+                parse_only=strainer
+            )
             hrefs = soup.find_all(
                 name='a',
                 href=True,

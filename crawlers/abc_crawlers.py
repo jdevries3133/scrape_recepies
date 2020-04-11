@@ -9,7 +9,7 @@ import certifi
 import pycurl
 
 logging.basicConfig(
-    filename='l:abc_crawlers.log',
+    filename='abc_crawlers.log',
     level='DEBUG',
     filemode='w',
     format='%(asctime)s %(levelname)-8s %(message)s'
@@ -71,10 +71,11 @@ class Crawler(ABC):
     def cache_urls(self, lol_parent_children, write_cache=True):
         if not write_cache:
             with shelve.open(self.cache_path) as db:
-                db[self.context['url cache key']] = lol_parent_children
+                lol_parent_children = db[self.context['url cache key']]
         if write_cache:
             with shelve.open(self.cache_path) as db:
-                lol_parent_children = db[self.context['url cache key']]
+                db[self.context['url cache key']] = lol_parent_children
+        logging.debug(f'lpc: {lol_parent_children}')
         return lol_parent_children
 
     def multithread_requests(self, urls):

@@ -6,7 +6,7 @@ ba_context = {
     'url cache key': 'all_urls',
     'read cache': False,
     'debug mode': True,
-    'read debug cache': False,
+    'read debug cache': True,
 }
 
 crawler = BonApetitCrawler(ba_context)
