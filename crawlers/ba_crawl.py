@@ -29,8 +29,8 @@ class BonApetitCrawler(Crawler):
         *** this now returns ALL urls, unsorted.***
         """
 
-        if self.context['read debug cache']:  # this defniitely works now
-            return self.cache_urls(None, write_cache=False)
+        if self.context['read debug cache']:
+            return self.cache_urls()
 
         all_urls = self.recursive([self.sitemap])
         if all_urls == []:
@@ -139,8 +139,8 @@ class BonApetitCrawler(Crawler):
         urls.
         """
         # write to the cache, only if we are not already reading from it.
-        write_cache = not self.context['read debug cache']
-        self.cache_urls(lol_parent_children, write_cache=write_cache)
+        if self.context['debug mode']:
+            self.cache_urls()
 
         if not hasattr(self, 'all_urls'):
             raise Exception(
@@ -149,19 +149,22 @@ class BonApetitCrawler(Crawler):
             )
 
         'need to rewrite to output new data structure.'
-        # ol = []
-        # shitlist = []
-        # for parent_url, child_urls in lol_parent_children:
-        #     for url in child_urls:
-        #         if '/recipe/' in url:
-        #             ol.append((parent_url, url))
-        #         else:
-        #             shitlist.append((parent_url, url))
+        output_dict = {
+            'url groups': {'recipe pages': {}, 'other urls': {}}
 
-        # if shitlist_mode:
-        #     return shitlist
+        }
+        for parent_url, child_urls in self.all_urls:
+            output_dict['url groups']['recipe pages'].update(
+                {parent_url:
+                    [url for url in child_urls if '/recipe/' in url]}
+            )
+            output_dict['url groups']['other urls'].update(
+                {parent_url:
+                    [url for url in child_urls if '/recipe/' not in url]}
+            )
 
-        return ol
+        self.url_dict = output_dict
+        return output_dict
 
     def scrape_recipes_from_page(self, url):
         """
@@ -179,6 +182,3 @@ class BonApetitCrawler(Crawler):
         date_string = f'{year}_{month}_week_{week}'
 
         return date_string
-
-    def cache_recipe_page_responses(self):
-        pass

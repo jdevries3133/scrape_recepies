@@ -65,8 +65,36 @@ class Crawler(ABC):
         use for development.
 
         '2014_3_week_4.html'
+
+        dict = {
+            'url groups': {
+                'recipe pages': {
+                    'parent url': [child urls],
+                    'parent url2': [child urls2],
+                }
+                'other urls': {
+                    'parent url': [other urls],
+                    (etc)
+                }
+            }
+        }
         """
-        pass
+        # dict data => [(url, (context))] --- that'll be var "input_list"
+        tuples_for_func = []
+        # context = {'supercat': 'super', 'subcat': 'sub'}
+        for sg_name, sg_content in self.url_dict['url groups'].items():
+            # sg_content will be a dict {'parent': [children]}
+            for parent, children in sg_content.items():
+                context = {'supercat': sg_name, 'subcat': parent}
+                for child in children:
+                    tuples_for_func.append(
+                        (child, context)
+                    )
+
+        # results are going to be (response, url, context)
+        results = self.multithread_requests(tuples_for_func[:100])
+
+        # all works up to this point
 
     def cache_urls(self):
         # reference 'read debug cache' attribute
@@ -96,15 +124,33 @@ class Crawler(ABC):
         return self.all_urls
 
     def multithread_requests(self, urls):
+
+        if isinstance(urls[0], tuple):
+            mode = 'tuples'
+
+        if isinstance(urls[0], str):
+            mode = 'regular'
+
         response_and_url = []
         with ThreadPoolExecutor(max_workers=200) as executor:
-            threads = [
-                executor.submit(
-                    self.make_pycurl_request, url
-                )
-                for url
-                in urls
-            ]
+            if mode == 'regular':
+                threads = [
+                    executor.submit(
+                        self.make_pycurl_request, url
+                    )
+                    for url
+                    in urls
+                ]
+
+            if mode == 'tuples':
+                threads = [
+                    executor.submit(
+                        self.make_pycurl_request, url, context
+                    )
+                    for url, context
+                    in urls
+                ]
+
 
             for r in as_completed(threads):
                 try:
@@ -115,7 +161,7 @@ class Crawler(ABC):
 
         return response_and_url
 
-    def make_pycurl_request(self, url):
+    def make_pycurl_request(self, url, context=None):
         try:
             buffer = BytesIO()
             crl = pycurl.Curl()
@@ -131,26 +177,24 @@ class Crawler(ABC):
         except Exception as e:
             raise Exception(f'{url} failed because of {e}.')
 
+        if context:
+            return buffer.getvalue().decode(), url, context
+
         return buffer.getvalue().decode(), url
+
+    @abstractmethod
+    def parse_parent(self):
+        """
+        Parse the parent urls from the standard dict above, so that they
+        can be used for folder or file names in the above method.
+        """
+        pass
 
     @abstractmethod
     def get_urls(self):
         """
         Recursively crawl through the site map, and get all
         urls for recipe pages.
-        """
-        pass
-
-    @abstractmethod
-    def cache_recipe_page_responses(self):
-        """
-        Make a request to all the recipe pages, and save them in the
-        database.
-
-        Make a locally stored html page for each response, which we can
-        use for development.
-
-        '2014_3_week_4.html'
         """
         pass
 
