@@ -11,5 +11,3 @@ ba_context = {
 
 crawler = BonApetitCrawler(ba_context)
 crawler.get_urls()
-print(crawler.url_dict)
-crawler.write_cache_func()
