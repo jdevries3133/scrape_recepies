@@ -1,4 +1,5 @@
 __pycache__
+recipe_finder/site_crawlers/cache/*
 urls.txt
 *.log
 venv

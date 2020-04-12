@@ -1,9 +1,12 @@
 from bs4 import BeautifulSoup
 
+from .abc_parsers import Parser
 
-class Parsers:
-    def __init__(self, soup):
-        self.soup = soup
+
+class BonApetitParser(Parser):
+
+    def __init__(self):
+        pass
 
     def bon_apetit_2020(self):
         """

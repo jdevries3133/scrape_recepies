@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
 from io import BytesIO
 import logging
 import os
@@ -120,11 +121,39 @@ class Crawler(ABC):
             with ThreadPoolExecutor(max_workers=200) as executor:
                 threads = executor.map(self.multithreaded_html_save, mthr_saves)
 
+    def cache_state(self):
+        # walk through cache
+        # return super-categories
+        # return length of each
+        # return average creation date
+        supercats = [item for item in os.listdir(self.html_dir) if item [0] != '.']
+
+
+        return_dict = {'html_dir': self.html_dir, 'supercats': {}}
+
+        for folder in supercats:
+            creation_dates = []
+            for file in os.listdir(os.path.join(self.html_dir, folder)):
+                unix_creation = os.path.getmtime(
+                    os.path.join(self.html_dir, folder, file))
+
+                creation_dates.append(unix_creation)
+
+            avg_timestamp = sum(creation_dates) // len(creation_dates)
+            date = datetime.fromtimestamp(avg_timestamp)
+            return_dict['supercats'][folder] = {
+                'num_of_files': len(os.listdir(os.path.join(self.html_dir, folder))),
+                'avg_creation_date': date
+            }
+
+        return return_dict
+
+
     def multithreaded_html_save(self, tupl):
         path, html = tupl
         with open(path, 'w') as file:
             file.write(html)
-        logging.debug(f'Saved {file} to the hard drive.')
+        logging.debug(f'Saved {path} to the hard drive.')
 
 
     def cache_urls(self):
