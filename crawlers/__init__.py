@@ -1,1 +1,0 @@
-from .ba_crawl import BonApetitCrawler

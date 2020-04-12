@@ -1,8 +1,10 @@
-from abc_crawlers import Crawler
 import logging
 import re
 
 from bs4 import BeautifulSoup, SoupStrainer
+
+from .abc_crawlers import Crawler
+
 
 logging.basicConfig(
     filename='ba_crawl.log',
