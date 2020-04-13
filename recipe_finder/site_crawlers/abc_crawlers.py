@@ -3,6 +3,7 @@ from datetime import datetime
 from io import BytesIO
 import logging
 import os
+from pathlib import Path
 import shelve
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -22,17 +23,16 @@ class Crawler(ABC):
         Things to put in context:
             Site name (string)
             Cache key
+
+        Important to note: the root_dir variable will break anytime that this
+        file is moved relative to the base directory.
         """
         self.sitemap = sitemap_url
         self.context = context
 
         # there should be a separate cache created for every new child
-        self.cache_dir = (
-            os.path.join(
-                os.path.dirname(os.path.abspath(__file__)),
-                'cache'
-            )
-        )
+        root_dir = Path.resolve(Path(__file__)).parent.parent.parent
+        self.cache_dir = os.path.join(root_dir, 'web_cache')
 
         # all instances will use the same database
         self.cache_path = os.path.join(
