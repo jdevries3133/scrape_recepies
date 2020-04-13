@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from datetime import datetime
+import time
 from io import BytesIO
 import logging
 import os
@@ -40,7 +40,7 @@ class Crawler(ABC):
             'crawler_cache'
         )
 
-        if self.context['read cache']:
+        if self.context['refresh cache']:
             self.url_dict = self.read_cache_func()
         else:
             self.url_dict = {}
@@ -122,29 +122,32 @@ class Crawler(ABC):
                 threads = executor.map(self.multithreaded_html_save, mthr_saves)
 
     def cache_state(self):
-        # walk through cache
-        # return super-categories
-        # return length of each
-        # return average creation date
+        """
+        walk through cache
+        return super-categories
+        return length of each
+        return average creation date
+        """
+
         supercats = [item for item in os.listdir(self.html_dir) if item [0] != '.']
 
 
         return_dict = {'html_dir': self.html_dir, 'supercats': {}}
-
+        creation_dates = []
         for folder in supercats:
-            creation_dates = []
             for file in os.listdir(os.path.join(self.html_dir, folder)):
                 unix_creation = os.path.getmtime(
                     os.path.join(self.html_dir, folder, file))
 
                 creation_dates.append(unix_creation)
 
-            avg_timestamp = sum(creation_dates) // len(creation_dates)
-            date = datetime.fromtimestamp(avg_timestamp)
             return_dict['supercats'][folder] = {
                 'num_of_files': len(os.listdir(os.path.join(self.html_dir, folder))),
-                'avg_creation_date': date
             }
+
+        avg_timestamp = sum(creation_dates) // len(creation_dates)
+        cache_age = time.time() - avg_timestamp
+        return_dict.setdefault('cache age', cache_age)
 
         return return_dict
 
@@ -157,8 +160,8 @@ class Crawler(ABC):
 
 
     def cache_urls(self):
-        # reference 'read debug cache' attribute
-        write_cache = not self.context['read debug cache']
+        # reference 'refresh cache'' attribute
+        write_cache = not self.context['refresh cache']
 
         # read cache
         if not write_cache:

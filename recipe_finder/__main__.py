@@ -13,6 +13,7 @@ modules that do three important things:
 
     Recipe objects recieves the recipe objects and stores them in a relational
     database using django models.
+        breakpoint()
 
 Each website has its own cralwer, parser, and object instantiator, which area
 derived from abstract classes, and which posess as much similarity as possible.
@@ -20,10 +21,8 @@ At the very least, every crawler, parser, and instantiator, respectively, have
 the same attributes and methods.
 
 """
-from site_crawlers import BonApetitCrawler, DebugContext
-from html_parsers import BonApetitParser
+from site_crawlers import BonApetitCrawler, check_cache
+from html_parsers import BonApetitParser, DebugContextParsers
 
-# ba_crawler dev block
-ba_crawler = BonApetitCrawler(DebugContext.ba_context)
-
-ba_cache_state = ba_crawler.cache_state()
+cache_state = check_cache('Bon Apetit')
+print(cache_state)

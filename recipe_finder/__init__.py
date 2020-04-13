@@ -11,6 +11,11 @@ classes, or other supporting files that you don't want outsiders to fuck with.
 
 """
 
-from .site_crawlers import BonApetitCrawler, DebugContext
+from .site_crawlers import BonApetitCrawler, check_cache, cached_sites
 from .html_parsers import BonApetitParser
 # As __main__.py develops, make sure that this file maintains the same import statements
+
+# cache quality will return 1 if cache needs to be replaced, in which case,
+# the crawler will do so. The crawler will just get new urls by default.
+cache_state = BonApetitCrawler(DebugContext.ba_context)
+

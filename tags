@@ -1,0 +1,103 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ABC	recipe_finder/./html_parsers/abc_parsers.py	/^from abc import ABC, abstractmethod$/;"	i
+ABC	recipe_finder/./recipe_objects/abc_recipes.py	/^from abc import ABC, abstractmethod$/;"	i
+ABC	recipe_finder/./recipe_objects/ba_recipes.py	/^from abc import ABC$/;"	i
+ABC	recipe_finder/./site_crawlers/abc_crawlers.py	/^from abc import ABC, abstractmethod$/;"	i
+BeautifulSoup	recipe_finder/./html_parsers/bon_apetit_parsers.py	/^from bs4 import BeautifulSoup$/;"	i
+BeautifulSoup	recipe_finder/./recipe_objects/ba_recipes.py	/^from bs4 import BeautifulSoup, SoupStrainer$/;"	i
+BeautifulSoup	recipe_finder/./site_crawlers/ba_crawl.py	/^from bs4 import BeautifulSoup, SoupStrainer$/;"	i
+BonApetitCrawler	recipe_finder/./__init__.py	/^from .site_crawlers import BonApetitCrawler, DebugContext$/;"	i
+BonApetitCrawler	recipe_finder/./__main__.py	/^from site_crawlers import BonApetitCrawler, DebugContext$/;"	i
+BonApetitCrawler	recipe_finder/./site_crawlers/__init__.py	/^from .ba_crawl import BonApetitCrawler$/;"	i
+BonApetitCrawler	recipe_finder/./site_crawlers/ba_crawl.py	/^class BonApetitCrawler(Crawler):$/;"	c
+BonApetitParser	recipe_finder/./__init__.py	/^from .html_parsers import BonApetitParser$/;"	i
+BonApetitParser	recipe_finder/./__main__.py	/^from html_parsers import BonApetitParser$/;"	i
+BonApetitParser	recipe_finder/./html_parsers/__init__.py	/^from .bon_apetit_parsers import BonApetitParser/;"	i
+BonApetitParser	recipe_finder/./html_parsers/bon_apetit_parsers.py	/^class BonApetitParser(Parser):$/;"	c
+BonApetitScrape	recipe_finder/./recipe_objects/ba_recipes.py	/^class BonApetitScrape:$/;"	c
+BytesIO	recipe_finder/./recipe_objects/ba_recipes.py	/^from io import BytesIO$/;"	i
+BytesIO	recipe_finder/./site_crawlers/abc_crawlers.py	/^from io import BytesIO$/;"	i
+Crawler	recipe_finder/./site_crawlers/abc_crawlers.py	/^class Crawler(ABC):$/;"	c
+Crawler	recipe_finder/./site_crawlers/ba_crawl.py	/^from .abc_crawlers import Crawler$/;"	i
+DebugContext	recipe_finder/./__init__.py	/^from .site_crawlers import BonApetitCrawler, DebugContext$/;"	i
+DebugContext	recipe_finder/./__main__.py	/^from site_crawlers import BonApetitCrawler, DebugContext$/;"	i
+DebugContext	recipe_finder/./site_crawlers/__init__.py	/^class DebugContext:$/;"	c
+Parser	recipe_finder/./html_parsers/abc_parsers.py	/^class Parser(ABC):$/;"	c
+Parser	recipe_finder/./html_parsers/bon_apetit_parsers.py	/^from .abc_parsers import Parser$/;"	i
+Parsers	recipe_finder/./recipe_objects/ba_recipes.py	/^from parsers import Parsers$/;"	i
+Path	recipe_finder/./site_crawlers/abc_crawlers.py	/^from pathlib import Path$/;"	i
+Recipes	recipe_finder/./recipe_objects/abc_recipes.py	/^class Recipes:$/;"	c
+SoupStrainer	recipe_finder/./recipe_objects/ba_recipes.py	/^from bs4 import BeautifulSoup, SoupStrainer$/;"	i
+SoupStrainer	recipe_finder/./site_crawlers/ba_crawl.py	/^from bs4 import BeautifulSoup, SoupStrainer$/;"	i
+ThreadPoolExecutor	recipe_finder/./recipe_objects/ba_recipes.py	/^from concurrent.futures import ThreadPoolExecutor, as_completed$/;"	i
+ThreadPoolExecutor	recipe_finder/./site_crawlers/abc_crawlers.py	/^from concurrent.futures import ThreadPoolExecutor, as_completed$/;"	i
+__init__	recipe_finder/./html_parsers/abc_parsers.py	/^    def __init__(self, cache_info):$/;"	m	class:Parser
+__init__	recipe_finder/./html_parsers/bon_apetit_parsers.py	/^    def __init__(self):$/;"	m	class:BonApetitParser
+__init__	recipe_finder/./recipe_objects/abc_recipes.py	/^    def __init__(self, title, ingredients, extra_info=None):$/;"	m	class:Recipes
+__init__	recipe_finder/./recipe_objects/ba_recipes.py	/^    def __init__(self, url):$/;"	m	class:BonApetitScrape
+__init__	recipe_finder/./site_crawlers/abc_crawlers.py	/^    def __init__(self, sitemap_url, context):$/;"	m	class:Crawler
+__init__	recipe_finder/./site_crawlers/ba_crawl.py	/^    def __init__(self, context):$/;"	m	class:BonApetitCrawler
+abstractmethod	recipe_finder/./html_parsers/abc_parsers.py	/^from abc import ABC, abstractmethod$/;"	i
+abstractmethod	recipe_finder/./recipe_objects/abc_recipes.py	/^from abc import ABC, abstractmethod$/;"	i
+abstractmethod	recipe_finder/./site_crawlers/abc_crawlers.py	/^from abc import ABC, abstractmethod$/;"	i
+as_completed	recipe_finder/./recipe_objects/ba_recipes.py	/^from concurrent.futures import ThreadPoolExecutor, as_completed$/;"	i
+as_completed	recipe_finder/./site_crawlers/abc_crawlers.py	/^from concurrent.futures import ThreadPoolExecutor, as_completed$/;"	i
+ba_cache_state	recipe_finder/./__main__.py	/^ba_cache_state = ba_crawler.cache_state()$/;"	v
+ba_context	recipe_finder/./site_crawlers/__init__.py	/^    ba_context = {$/;"	v	class:DebugContext
+ba_crawler	recipe_finder/./__main__.py	/^ba_crawler = BonApetitCrawler(DebugContext.ba_context)$/;"	v
+cache_recipe_page_responses	recipe_finder/./site_crawlers/abc_crawlers.py	/^    def cache_recipe_page_responses(self):$/;"	m	class:Crawler
+cache_state	recipe_finder/./site_crawlers/abc_crawlers.py	/^    def cache_state(self):$/;"	m	class:Crawler
+cache_urls	recipe_finder/./site_crawlers/abc_crawlers.py	/^    def cache_urls(self):$/;"	m	class:Crawler
+certifi	recipe_finder/./recipe_objects/ba_recipes.py	/^import certifi$/;"	i
+certifi	recipe_finder/./site_crawlers/abc_crawlers.py	/^import certifi$/;"	i
+copy	recipe_finder/./recipe_objects/ba_recipes.py	/^from copy import copy$/;"	i
+datetime	recipe_finder/./site_crawlers/abc_crawlers.py	/^from datetime import datetime$/;"	i
+file_name_from_url	recipe_finder/./site_crawlers/abc_crawlers.py	/^    def file_name_from_url(self):$/;"	m	class:Crawler
+file_name_from_url	recipe_finder/./site_crawlers/ba_crawl.py	/^    def file_name_from_url(self, url):$/;"	m	class:BonApetitCrawler
+filemode	recipe_finder/./recipe_objects/ba_recipes.py	/^    filemode='w',$/;"	v
+filemode	recipe_finder/./site_crawlers/abc_crawlers.py	/^    filemode='w',$/;"	v
+filemode	recipe_finder/./site_crawlers/ba_crawl.py	/^    filemode='w',$/;"	v
+filename	recipe_finder/./recipe_objects/ba_recipes.py	/^    filename='l_main.log',$/;"	v
+filename	recipe_finder/./site_crawlers/abc_crawlers.py	/^    filename='abc_crawlers.log',$/;"	v
+filename	recipe_finder/./site_crawlers/ba_crawl.py	/^    filename='ba_crawl.log',$/;"	v
+format	recipe_finder/./recipe_objects/ba_recipes.py	/^    format='%(asctime)s %(levelname)-8s %(message)s'$/;"	v
+format	recipe_finder/./site_crawlers/abc_crawlers.py	/^    format='%(asctime)s %(levelname)-8s %(message)s'$/;"	v
+format	recipe_finder/./site_crawlers/ba_crawl.py	/^    format='%(asctime)s %(levelname)-8s %(message)s'$/;"	v
+gather_data	recipe_finder/./recipe_objects/ba_recipes.py	/^    def gather_data(self):$/;"	m	class:BonApetitScrape
+get_page	recipe_finder/./recipe_objects/ba_recipes.py	/^    def get_page(self):$/;"	m	class:BonApetitScrape
+get_urls	recipe_finder/./site_crawlers/abc_crawlers.py	/^    def get_urls(self):$/;"	m	class:Crawler
+get_urls	recipe_finder/./site_crawlers/ba_crawl.py	/^    def get_urls(self):$/;"	m	class:BonApetitCrawler
+level	recipe_finder/./recipe_objects/ba_recipes.py	/^    level='DEBUG',$/;"	v
+level	recipe_finder/./site_crawlers/abc_crawlers.py	/^    level='DEBUG',$/;"	v
+level	recipe_finder/./site_crawlers/ba_crawl.py	/^    level='DEBUG',$/;"	v
+logging	recipe_finder/./recipe_objects/ba_recipes.py	/^import logging$/;"	i
+logging	recipe_finder/./site_crawlers/abc_crawlers.py	/^import logging$/;"	i
+logging	recipe_finder/./site_crawlers/ba_crawl.py	/^import logging$/;"	i
+make_pycurl_request	recipe_finder/./site_crawlers/abc_crawlers.py	/^    def make_pycurl_request(self, url, context=None):$/;"	m	class:Crawler
+make_url_dict	recipe_finder/./site_crawlers/abc_crawlers.py	/^    def make_url_dict(self):$/;"	m	class:Crawler
+make_url_dict	recipe_finder/./site_crawlers/ba_crawl.py	/^    def make_url_dict(self):$/;"	m	class:BonApetitCrawler
+multithread_requests	recipe_finder/./site_crawlers/abc_crawlers.py	/^    def multithread_requests(self, urls):$/;"	m	class:Crawler
+multithreaded_html_save	recipe_finder/./site_crawlers/abc_crawlers.py	/^    def multithreaded_html_save(self, tupl):$/;"	m	class:Crawler
+os	recipe_finder/./recipe_objects/ba_recipes.py	/^import os$/;"	i
+os	recipe_finder/./site_crawlers/abc_crawlers.py	/^import os$/;"	i
+parse	recipe_finder/./recipe_objects/ba_recipes.py	/^    def parse(self, soup):$/;"	m	class:BonApetitScrape
+parse_parent	recipe_finder/./site_crawlers/abc_crawlers.py	/^    def parse_parent(self):$/;"	m	class:Crawler
+parse_parent	recipe_finder/./site_crawlers/ba_crawl.py	/^    def parse_parent(self, parent_url):$/;"	m	class:BonApetitCrawler
+pycurl	recipe_finder/./recipe_objects/ba_recipes.py	/^import pycurl$/;"	i
+pycurl	recipe_finder/./site_crawlers/abc_crawlers.py	/^import pycurl$/;"	i
+re	recipe_finder/./recipe_objects/ba_recipes.py	/^import re$/;"	i
+re	recipe_finder/./site_crawlers/ba_crawl.py	/^import re$/;"	i
+read_cache_func	recipe_finder/./site_crawlers/abc_crawlers.py	/^    def read_cache_func(self):$/;"	m	class:Crawler
+recursive	recipe_finder/./site_crawlers/abc_crawlers.py	/^    def recursive(self, links_to_do, cache=False):$/;"	m	class:Crawler
+recursive	recipe_finder/./site_crawlers/ba_crawl.py	/^    def recursive(self, links_to_do):$/;"	m	class:BonApetitCrawler
+scrape_recipes_from_page	recipe_finder/./site_crawlers/ba_crawl.py	/^    def scrape_recipes_from_page(self, url):$/;"	m	class:BonApetitCrawler
+shelve	recipe_finder/./recipe_objects/ba_recipes.py	/^import shelve$/;"	i
+shelve	recipe_finder/./site_crawlers/abc_crawlers.py	/^import shelve$/;"	i
+sys	recipe_finder/./recipe_objects/ba_recipes.py	/^import sys$/;"	i
+time	recipe_finder/./recipe_objects/ba_recipes.py	/^import time$/;"	i
+write_cache_func	recipe_finder/./site_crawlers/abc_crawlers.py	/^    def write_cache_func(self):$/;"	m	class:Crawler

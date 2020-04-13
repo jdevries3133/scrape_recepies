@@ -29,3 +29,8 @@ each recipe:
 """
 
 from .bon_apetit_parsers import BonApetitParser
+
+class DebugContextParsers:
+    ba_context = {
+            'debug_mode': True,
+        }
