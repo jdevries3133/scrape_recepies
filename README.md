@@ -1,3 +1,1 @@
-Get recepies from the internet!
-
-See init files for notes on new sub-modules
+Scrape every recipe from bonapetit.com
